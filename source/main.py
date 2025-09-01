@@ -6,7 +6,6 @@ import random
 import asyncio
 import logging
 import base64
-import requests
 import httpx
 import urllib3
 import zoneinfo
@@ -63,7 +62,7 @@ def get_country_by_ip(ip: str) -> str:
     if ip in geo_cache:
         return geo_cache[ip]
     try:
-        r = requests.get(f"https://ipwhois.app/json/{ip}", timeout=5)
+        r = httpx.get(f"https://ipwhois.app/json/{ip}", timeout=5)
         if r.status_code == 200:
             code = r.json().get("country_code", "unknown").lower()
             geo_cache[ip] = code
@@ -73,11 +72,11 @@ def get_country_by_ip(ip: str) -> str:
     geo_cache[ip] = "unknown"
     return "unknown"
 
-# ──────────────── Fetch & Decode ────────────────
-def fetch_data(url: str, timeout: int = 10) -> str:
+# ──────────────── Request Helper ────────────────
+def send_request(url: str, timeout: int = 10) -> str:
     headers = {"User-Agent": CHROME_UA}
     try:
-        resp = requests.get(url, headers=headers, timeout=timeout, verify=False)
+        resp = httpx.get(url, headers=headers, timeout=timeout, verify=False)
         resp.raise_for_status()
         return resp.text
     except Exception as e:
@@ -300,7 +299,7 @@ async def main_async():
 
         # Fetch & categorize
         for url in URLS:
-            blob = maybe_base64_decode(fetch_data(url))
+            blob = maybe_base64_decode(send_request(url))
             configs = re.findall(r"[a-zA-Z][\w+.-]*://[^\s]+", blob)
             logging.info(f"Fetched {url} → {len(configs)} configs")
 
