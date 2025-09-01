@@ -257,11 +257,12 @@ def rename_generic(link: str, ip: str, port: str, tag: str) -> str:
     """Rename any URL-style config by replacing host/port and appending tag."""
     try:
         parts = urlsplit(link)
+        host_ip = ip.split("@", 1)[-1]
         if parts.username or parts.password:
             userinfo = parts.netloc.split("@", 1)[0]
-            netloc = f"{userinfo}@{ip}:{port}"
+            netloc = f"{userinfo}@{host_ip}:{port}"
         else:
-            netloc = f"{ip}:{port}"
+            netloc = f"{host_ip}:{port}"
         return urlunsplit((parts.scheme, netloc, parts.path, parts.query, quote(tag)))
     except Exception as e:
         logging.debug(f"rename_generic error: {e}")
@@ -277,6 +278,7 @@ async def rename_line(client: httpx.AsyncClient, link: str) -> str:
         host, port = host_port.rsplit(":", 1)
     else:
         host, port = host_port, "443"
+    host = host.split("@", 1)[-1]
 
     try:
         ip = await asyncio.to_thread(socket.gethostbyname, host)
