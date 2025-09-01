@@ -6,10 +6,10 @@ import random
 import asyncio
 import logging
 import base64
-import requests
 import httpx
 import urllib3
 import zoneinfo
+from urllib.parse import quote, urlsplit, urlunsplit
 
 from datetime import datetime
 
@@ -58,11 +58,11 @@ def country_flag(code: str) -> str:
         return "🏳️"
     return chr(ord(c[0]) + 127397) + chr(ord(c[1]) + 127397)
 
-def get_country_by_ip(ip: str) -> str:
+async def get_country_by_ip(client: httpx.AsyncClient, ip: str) -> str:
     if ip in geo_cache:
         return geo_cache[ip]
     try:
-        r = requests.get(f"https://ipwhois.app/json/{ip}", timeout=5)
+        r = await client.get(f"https://ipwhois.app/json/{ip}", timeout=5)
         if r.status_code == 200:
             code = r.json().get("country_code", "unknown").lower()
             geo_cache[ip] = code
@@ -73,12 +73,11 @@ def get_country_by_ip(ip: str) -> str:
     return "unknown"
 
 # ──────────────── Fetch & Decode ────────────────
-def fetch_data(url: str, timeout: int = 10) -> str:
-    headers = {"User-Agent": CHROME_UA}
+async def fetch_data(client: httpx.AsyncClient, url: str, timeout: int = 10) -> str:
     try:
-        resp = requests.get(url, headers=headers, timeout=timeout, verify=False)
-        resp.raise_for_status()
-        return resp.text
+        r = await client.get(url, timeout=timeout)
+        r.raise_for_status()
+        return r.text
     except Exception as e:
         logging.error(f"Download error for {url}: {e}")
         return ""
@@ -87,7 +86,7 @@ def maybe_base64_decode(s: str) -> str:
     s = s.strip()
     try:
         decoded = b64_decode(s)
-        if any(proto in decoded for proto in ("vless://", "vmess://", "trojan://", "ss://")):
+        if "://" in decoded:
             return decoded.strip()
     except Exception:
         pass
@@ -95,31 +94,40 @@ def maybe_base64_decode(s: str) -> str:
 
 # ──────────────── Parser ────────────────
 def detect_protocol(link: str) -> str:
-    l = link.strip().lower()
-    if l.startswith("vless://"):
-        return "vless"
-    if l.startswith("vmess://"):
-        return "vmess"
-    if l.startswith("ss://"):
+    """Return the scheme of a link (e.g., vmess, vless, ss, trojan, hysteria…)."""
+    m = re.match(r"([a-z0-9+.-]+)://", link.strip().lower())
+    if not m:
+        return "unknown"
+    proto = m.group(1)
+    if proto == "ss":
         return "shadowsocks"
-    if l.startswith("trojan://"):
-        return "trojan"
-    return "unknown"
+    return proto
 
 def extract_host(link: str, proto: str) -> str:
+    """Extract ``host[:port]`` from a link, ignoring any userinfo."""
     try:
         if proto == "vmess":
             cfg = json.loads(b64_decode(link[8:]))
-            return cfg.get("add", "")
-        if proto == "vless":
-            m = re.search(r"vless://[^@]+@([^:/]+)", link)
-            return m.group(1) if m else ""
-        if proto == "shadowsocks":
-            m = re.search(r"ss://(?:[^@]+@)?([^:/]+)", link)
-            return m.group(1) if m else ""
-        if proto == "trojan":
-            m = re.search(r"trojan://[^@]+@([^:/?#]+)", link)
-            return m.group(1) if m else ""
+            return f"{cfg.get('add', '')}:{cfg.get('port', '')}"
+
+        parsed = urlsplit(link)
+        host = parsed.hostname or ""
+        port = str(parsed.port or "")
+
+        if proto == "shadowsocks" and not host:
+            body = link.split("ss://", 1)[1]
+            if "#" in body:
+                body, _ = body.split("#", 1)
+            try:
+                decoded = b64_decode(body)
+                if "@" in decoded:
+                    _, server = decoded.rsplit("@", 1)
+                    if ":" in server:
+                        host, port = server.rsplit(":", 1)
+            except Exception:
+                pass
+
+        return f"{host}:{port}" if host and port else host
     except Exception as e:
         logging.debug(f"extract_host error for [{proto}] {link}: {e}")
     return ""
@@ -215,97 +223,83 @@ def save_to_file(path: str, lines: list[str]):
     logging.info(f"Saved: {path} ({len(lines)} lines)")
 
 # ──────────────── Renaming Helpers ────────────────
-def rename_ss(link: str, ip: str, port: str, tag: str) -> str:
-    """
-    نسخه هوشمند rename برای Shadowsocks:
-    - Base64 کامل یا بدون Base64
-    - با یا بدون @
-    """
+
+def rename_vmess(link: str, ip: str, port: str, tag: str) -> str:
     try:
-        raw = link.split("ss://", 1)[1]
-        hash_tag = ""
-        if "#" in raw:
-            raw, hash_tag = raw.split("#", 1)
-
-        if "@" in raw:
-            creds, _ = raw.split("@", 1)
-            try:
-                decoded = b64_decode(creds)
-                if ":" in decoded:
-                    method, pwd = decoded.split(":", 1)
-                else:
-                    method, pwd = creds.split(":", 1)
-            except Exception:
-                if ":" in creds:
-                    method, pwd = creds.split(":", 1)
-                else:
-                    method, pwd = creds, "password"
-        else:
-            decoded = b64_decode(raw)
-            if ":" in decoded:
-                method, pwd = decoded.split(":", 1)
-            else:
-                method, pwd = decoded, "password"
-
-        new_creds = b64_encode(f"{method}:{pwd}")
-        return f"ss://{new_creds}@{ip}:{port}#{tag}"
+        raw = link.split("://", 1)[1]
+        cfg = json.loads(b64_decode(raw))
+        cfg.update({"add": ip, "port": int(port), "ps": tag})
+        return f"vmess://{b64_encode(json.dumps(cfg))}#{quote(tag)}"
     except Exception as e:
-        logging.warning(f"rename_ss failed: {e}")
+        logging.debug(f"vmess rename error: {e}")
         return link
 
-def rename_trojan_or_vless(link: str, ip: str, port: str, tag: str) -> str:
-    out = re.sub(r"@[^:/#]+(:\d+)?", f"@{ip}:{port}", link)
-    if "#" in out:
-        out = re.sub(r"#.*$", f"#{tag}", out)
-    else:
-        out += f"#{tag}"
-    return out
+def rename_shadowsocks(link: str, ip: str, port: str, tag: str) -> str:
+    try:
+        body = link.split("ss://", 1)[1]
+        if "#" in body:
+            body, _ = body.split("#", 1)
+        if "@" in body:
+            creds, _ = body.split("@", 1)
+            try:
+                method, pwd = b64_decode(creds).split(":", 1)
+            except Exception:
+                method, pwd = creds.split(":", 1)
+        else:
+            method, pwd = b64_decode(body).split(":", 1)
+        new_creds = b64_encode(f"{method}:{pwd}")
+        return f"ss://{new_creds}@{ip}:{port}#{quote(tag)}"
+    except Exception as e:
+        logging.debug(f"shadowsocks rename error: {e}")
+        return link
 
-def rename_line(link: str) -> str:
+def rename_generic(link: str, ip: str, port: str, tag: str) -> str:
+    """Rename any URL-style config by replacing host/port and appending tag."""
+    try:
+        parts = urlsplit(link)
+        if parts.username or parts.password:
+            userinfo = parts.netloc.split("@", 1)[0]
+            netloc = f"{userinfo}@{ip}:{port}"
+        else:
+            netloc = f"{ip}:{port}"
+        return urlunsplit((parts.scheme, netloc, parts.path, parts.query, quote(tag)))
+    except Exception as e:
+        logging.debug(f"rename_generic error: {e}")
+        return link
+
+async def rename_line(client: httpx.AsyncClient, link: str) -> str:
     proto = detect_protocol(link)
-    host = extract_host(link, proto)
-    if not host:
+    host_port = extract_host(link, proto)
+    if not host_port:
         return link
 
-    if ":" in host:
-        host, port = host.split(":", 1)
+    if ":" in host_port:
+        host, port = host_port.rsplit(":", 1)
     else:
-        port = "443"
+        host, port = host_port, "443"
 
     try:
-        ip = socket.gethostbyname(host)
+        ip = await asyncio.to_thread(socket.gethostbyname, host)
     except socket.gaierror as e:
         logging.warning(f"DNS lookup failed for {host}: {e}")
         ip = host
 
-    country = get_country_by_ip(ip)
+    country = await get_country_by_ip(client, ip)
     flag = country_flag(country)
     tag = f"{flag} ShatalVPN {random.randint(100000, 999999)}"
 
     if proto == "vmess":
-        try:
-            raw = link.split("://", 1)[1]
-            cfg = json.loads(b64_decode(raw))
-            cfg.update({"add": ip, "port": int(port), "ps": tag})
-            return f"vmess://{b64_encode(json.dumps(cfg))}#{tag}"
-        except Exception as e:
-            logging.debug(f"vmess rename error: {e}")
-            return link
-
-    if proto == "ss":
-        return rename_ss(link, ip, port, tag)
-
-    if proto in ("vless", "trojan"):
-        return rename_trojan_or_vless(link, ip, port, tag)
-
-    return link
+        return rename_vmess(link, ip, port, tag)
+    if proto == "shadowsocks":
+        return rename_shadowsocks(link, ip, port, tag)
+    return rename_generic(link, ip, port, tag)
 
 # ──────────────── Main Flow ────────────────
 async def main_async():
     now = datetime.now(ZONE).strftime("%Y-%m-%d %H:%M:%S")
     logging.info(f"[{now}] Starting download and processing…")
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(headers={"User-Agent": CHROME_UA}, verify=False) as client:
         country_nodes = await get_nodes_by_country(client)
 
         categorized: dict[str, dict[str, list[tuple[str, str]]]] = {}
@@ -313,11 +307,8 @@ async def main_async():
 
         # Fetch & categorize
         for url in URLS:
-            blob = maybe_base64_decode(fetch_data(url))
-            configs = re.findall(
-                r"(vless://[^\s]+|vmess://[^\s]+|trojan://[^\s]+|ss://[^\s]+)",
-                blob,
-            )
+            blob = maybe_base64_decode(await fetch_data(client, url))
+            configs = re.findall(r"[a-zA-Z][\w+.-]*://[^\s]+", blob)
             logging.info(f"Fetched {url} → {len(configs)} configs")
 
             for link in configs:
@@ -327,9 +318,7 @@ async def main_async():
                     continue
                 all_pairs.append((link, host))
                 for country in country_nodes:
-                    categorized.setdefault(country, {
-                        "vless": [], "vmess": [], "shadowsocks": [], "trojan": [], "unknown": []
-                    })[proto].append((link, host))
+                    categorized.setdefault(country, {}).setdefault(proto, []).append((link, host))
 
         # Prepare and run ping tasks concurrently (capped at 5 by semaphore)
         hosts = list({host for _, host in all_pairs})
@@ -349,19 +338,16 @@ async def main_async():
                     if h == host:
                         latencies[link] = lat
 
-            # مرتب‌سازی بر اساس تاخیر
             sorted_links = [l for l, _ in sorted(latencies.items(), key=lambda x: x[1])]
-            renamed_all = [rename_line(l) for l in sorted_links]
+            renamed_all = await asyncio.gather(*(rename_line(client, l) for l in sorted_links))
 
             dest_dir = os.path.join(OUTPUT_DIR, country)
             os.makedirs(dest_dir, exist_ok=True)
 
             for proto, items in groups.items():
                 lst = [l for l in sorted_links if detect_protocol(l) == proto]
-                save_to_file(
-                    os.path.join(dest_dir, f"{proto}.txt"),
-                    [rename_line(l) for l in lst]
-                )
+                renamed = await asyncio.gather(*(rename_line(client, l) for l in lst))
+                save_to_file(os.path.join(dest_dir, f"{proto}.txt"), renamed)
 
             save_to_file(os.path.join(dest_dir, "all.txt"), renamed_all)
             save_to_file(os.path.join(dest_dir, "light.txt"), renamed_all[:30])
