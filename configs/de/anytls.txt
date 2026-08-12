@@ -1,1 +1,1 @@
-anytls://140.82.112.3:443/Alvin9999-newpac/fanqiang@ip3.934618.xyz:17700?security=tls&type=tcp&packetEncoding=none&allowInsecure=1&sni=ip3.934618.xyz&insecure=1&udp=1#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20657878
+anytls://13f0acfa-38c1-4e82-a758-583aa31740df@52.220.144.20:60572?security=tls&type=tcp&packetEncoding=none&allowInsecure=1&sni=yzhou015.jdvipkuai.cc&insecure=1&udp=1#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20150888
