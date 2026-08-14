@@ -1,1 +1,1 @@
-udp://8.8.8.8&type=ws&host=josni.hoyes.cloudns.ch&path=musiclovers85:443?ed=512#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20544777
+udp://8.8.8.8&type=ws&allowInsecure=0&sni=support.zoom.us.yxls.eu.cc:443#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20194335
