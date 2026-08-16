@@ -1,1 +1,1 @@
-udp://8.8.8.8&type=ws&allowInsecure=0&sni=josni.hoyes.cloudns.ch:443#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20587568
+udp://8.8.8.8&type=ws&allowInsecure=0&sni=josni.hoyes.cloudns.ch:443#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20163822
