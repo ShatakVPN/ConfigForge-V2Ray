@@ -1,2 +1,2 @@
-anytls://13f0acfa-38c1-4e82-a758-583aa31740df@47.131.250.203:60572?security=tls&type=tcp&packetEncoding=none&sni=yzhou015.jdvipkuai.cc&udp=1&username=13f0acfa-38c1-4e82-a758-583aa31740df#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20841282
-anytls://13f0acfa-38c1-4e82-a758-583aa31740df@138.2.120.13:47901?security=tls&type=tcp&packetEncoding=none&sni=kr06.nyssl.cc&udp=1&username=13f0acfa-38c1-4e82-a758-583aa31740df#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20290641
+anytls://13f0acfa-38c1-4e82-a758-583aa31740df@47.131.250.203:60572?security=tls&type=tcp&packetEncoding=none&sni=yzhou015.jdvipkuai.cc&udp=1&username=13f0acfa-38c1-4e82-a758-583aa31740df#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20976072
+anytls://13f0acfa-38c1-4e82-a758-583aa31740df@3.34.107.185:47901?security=tls&type=tcp&packetEncoding=none&sni=kr06.nyssl.cc&udp=1&username=13f0acfa-38c1-4e82-a758-583aa31740df#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20723427
