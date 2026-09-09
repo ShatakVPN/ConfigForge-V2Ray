@@ -1,2 +1,2 @@
-udp://8.8.8.8&security=tls&type=ws&insecure=0&path=:443/assignment&host=www.ignitelimit.com&sni=www.ignitelimit.com#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20706772
-udp://8.8.8.8&type=ws&allowInsecure=0&sni=www.ignitelimit.com:443#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20150958
+udp://8.8.8.8&security=tls&type=ws&insecure=0&path=:443/assignment&host=www.ignitelimit.com&sni=www.ignitelimit.com#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20197367
+udp://8.8.8.8&type=ws&allowInsecure=0&sni=www.ignitelimit.com:443#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20143821
