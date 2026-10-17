@@ -1,1 +1,1 @@
-cloudflare-ech.com+udp://1.1.1.1:443#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20933868
+cloudflare-ech.com+udp://1.1.1.1:443#%F0%9F%87%A6%F0%9F%87%BA%20ShatakVPN%20903660
