@@ -1,8 +1,5 @@
-trojan://Aimer@167.68.4.199:2053?ed=2560&eh=Sec-WebSocket-Protocol&host=epge.muarua.filegear-sg.me&path=%2F%3Fproxyip%3Dts.hpc.tw&sni=epge.muarua.filegear-sg.me&type=ws#%F0%9F%87%BA%F0%9F%87%B8%20ShatakVPN%20340390
-trojan://MiTiVPN@199.232.78.160:443?alpn=http%2F1.1&fp=chrome&host=mitivpn-mitivpn-mitivpn---mitivpn--mitivpn.global.ssl.fastly.net&path=%2F---%40MiTiVPN---%40MiTiVPN%2F---%40MiTiVPN---%40MiTiVPN%2F---%40MiTiVPN---%40MiTiVPN%2FNLSs---%40MiTiVPN---%40MiTiVPN%2F---%40MiTiVPN---%40MiTiVPN%2F---%40MiTiVPN---%40MiTiVPN&sni=ssl.fastly.com&type=ws#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20763823
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@66.163.122.26:443?security=tls&sni=blog.searchnationwidecareerchangehelperandguidancetoday.com&type=tcp&headerType=none#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20932991
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@170.101.101.67:443?security=tls&sni=courses.explorecreativejobsandenhanceyourcareerportfolio.com&type=tcp&headerType=none#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20623031
-trojan://d9064589-74af-432a-9390-5d8a9da281bf@157.254.38.210:20051?security=tls&sni=hk.catxstar.com&path=/#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20616354
-trojan://d7563108-615c-4338-a7bd-77f359869a4a@157.254.38.210:20103?security=tls&sni=hk.catxstar.com&path=/#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20837435
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@193.108.119.29:443?security=tls&sni=blog.iloverussia2026.com&path=/#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20513861
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@15.235.184.127:443?security=tls&sni=exploredigitaljobplatformandfindonlinework.com&path=/#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20884817
+trojan://eabf1999fefbb7d2@104.21.42.129:2087?alpn=http%2F1.1&ed=2560&eh=Sec-WebSocket-Protocol&fp=ios&host=waysi.waysi6688.workers.dev&path=%2Ftr%2FsMpzOZ0eWEt6jbZ1jjN3BaM7LLoQ&sni=WaYSi.wAYsI6688.WOrkeRS.deV&type=ws#%F0%9F%87%BA%F0%9F%87%B8%20ShatakVPN%20197397
+trojan://Aimer@167.68.4.199:2053?ed=2560&eh=Sec-WebSocket-Protocol&host=epge.muarua.filegear-sg.me&path=%2F%3Fproxyip%3Dts.hpc.tw&sni=epge.muarua.filegear-sg.me&type=ws#%F0%9F%87%BA%F0%9F%87%B8%20ShatakVPN%20184858
+trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@169.197.140.214:443?security=tls&insecure=0&headerType=none&type=tcp&allowInsecure=0&sni=courses.discoverfreshgraduatejobsstartyourprofessionaljourney.com#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20976890
+trojan://d7563108-615c-4338-a7bd-77f359869a4a@157.254.38.210:20027?security=tls&sni=hk.catxstar.com&type=tcp&path=/#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20172832
+trojan://d7563108-615c-4338-a7bd-77f359869a4a@157.254.38.210:20028?security=tls&sni=hk.catxstar.com&path=/#%F0%9F%8F%B3%EF%B8%8F%20ShatakVPN%20584424
